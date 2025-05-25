@@ -9,13 +9,23 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build(args: &Vec<String>) -> Result<Self, &'static str> {
-        if args.len() < 3 {
-            return Err("Please provide two command line arguments")
-        }
-        let query = args[1].clone();
-        let filename = args[2].clone();
+    pub fn build(
+        mut args: impl Iterator<Item = String>
+    ) -> Result<Self, &'static str> {
+        args.next(); // Skip first argument
+
+        let query = match args.next() {
+            Some(s) => s,
+            None => return Err("Could not parse query (args[1]) into String")
+        };
+
+        let filename = match args.next() {
+            Some(s) => s,
+            None => return Err("Could not parse filename (args[2]) into String")
+        };
+
         let ignore_case = env::var("IGNORE_CASE").is_ok();
+        
         Ok(Config { query, filename, ignore_case })
     }
 }
